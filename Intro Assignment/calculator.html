@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <!--...--> <link href="https://fonts.cdnfonts.com/css/calculator" rel="stylesheet">
+
+    <title>Document</title>
+    <style>
+        
+        .container{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            
+        }
+        button{
+            padding: 20px;
+            color: black;
+            background-color: yellow;
+            margin: 2px;
+            width: 100px;
+            font-size: 20px;
+
+            font-family: 'Calculator', sans-serif;
+            border: 1px solid;
+            border-radius: 40px;
+        }
+        input[type="text"] {
+            width: 295px; 
+            height: 40px;
+            padding: 5px;
+            margin: 1px;
+            font-size: 40px; 
+
+
+
+
+
+            border: 5px solid;
+            border-radius: 40px;
+            font-family: 'Calculator', sans-serif;
+        }
+        div[class^="row-"] {
+            background-color: black;
+            border: 5px solid;
+            border-radius: 40px;
+        }
+        #header{
+            padding:20px;
+            font-size: 30px;
+        }
+        button:hover{
+            background-color: white;
+           
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <hl id = "header">CPSC 431 Assignment 2</hl>
+       
+        <div class="row-zero">
+         <input type="text" id="display"><button id ="buttonClr">C</button>
+        </div>
+        <div class="row-one">
+            <button>1</button><button >2</button><button >3</button><button >/</button>
+        </div>
+        <div class="row-two">
+            <button>4</button><button>5</button><button>6</button><button>*</button>
+        </div>
+        <div class="row-three">
+            <button>7</button><button>8</button><button>9</button><button>-</button>
+        </div>
+        <div class="row-four">
+            <button>0</button><button>.</button><button>=</button><button>+</button>
+        </div>
+    </div>
+    <script>
+     "use strict";   //prevent sloppy mode
+
+function isDecimalLessThanThree(input) {
+    let decimals = input.toString();
+    if(decimals.includes('.')){ // check if decimal present
+     decimals = decimals.split('.')[1].length; // split it at the '.' and return size of decimal
+     if (decimals > 3 ){ 
+        return false;
+        }
+    }
+    return true;
+  }
+  
+let decimalFlag = false; // reset everytime a non number is pressed 
+let  operationFlag=false; // keep track of operators
+let calculator = document.querySelector('.container'); // grab html  by class "container"
+
+calculator.addEventListener('click', function(event) { // in the container if button is click 
+    if (event.target.tagName === 'BUTTON') { // helps with flow of calculator input 
+        let input = event.target.innerText;
+        if (isNaN(input)){ // if value is Not a number
+         
+        switch (input) { 
+            case "C": // clear button
+            decimalFlag=false; 
+                document.getElementById("display").value = ""; // reset the input value
+                 break;
+            case ".": //decimal button
+                if (decimalFlag == false){ // check to see if decimal has been  used 
+                  document.getElementById("display").value += '.'; // if it has not been used append '.'
+                  operationFlag = true; // set to true to prevent cases such as : 123. + xyz 
+                  decimalFlag=true; 
+                  }
+                  break;
+            case"=": // equals button
+               
+                operationFlag = false; // after  calculation set back to false so user can use opertator
+                let result =  eval(document.getElementById('display').value);
+                if(isDecimalLessThanThree(result)){ 
+                    document.getElementById('display').value = result;
+                }
+                else{ 
+                    document.getElementById('display').value = result.toFixed(3); // evaluate the input string to return to user 
+                }
+                break;
+            default: // all operators, besides the ones listed above, do the same thing
+            if(!operationFlag){ 
+                document.getElementById("display").value += input; // adding the operator 
+                operationFlag = true; // once user clicks operator change flag value so that another operator cannot be added until a number is clicked 
+                decimalFlag=false; 
+                break;
+            }
+            }
+          }
+
+        else{ // isNaN = false, we append the numbers and reset the operationFlag to allow for calculation 
+            operationFlag = false;
+          document.getElementById("display").value += input;
+        }
+    }
+});
+    </script>
+    
+</body>
+
+</html>
