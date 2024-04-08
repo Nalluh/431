@@ -8,7 +8,7 @@
 // api endpoints
 // https://www.weatherapi.com/api-explorer.aspx
                 
-$apiKey = '5b66a70d3f1b428282401515240804';
+
 $city = 'Fullerton';
 $API = "http://api.weatherapi.com/v1/current.json?key={$apiKey}&q={$city}&aqi=no";
 
