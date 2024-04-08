@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CPSC431 Homework 3 App</title>
+    <style>
+        button {
+            cursor: pointer;
+            padding: 6px;
+
+        }
+
+        input {
+            border-radius: 10px;
+            padding: 4px;
+            border:  3px solid black;
+        }
+
+        body {
+           background-color:slategray;
+        }
+        main {
+         
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           flex-direction: column;
+
+        }
+        header {
+            display: flex;
+           justify-content: center;
+           align-items: center;
+           flex-direction: column;
+        }
+
+        #addStudent, #findStudent, #allStudent, #deleteStudent, #updateStudent, #addStudentGrade, #resetStudents {
+            padding: 30px;
+        }
+
+        #allStudentButton{
+            margin-left: 55px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        #resetStudentsButton {
+            margin-left: 30px;
+        }
+
+        .rowDisplay{
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row;
+        }
+
+        #TestResults {
+            font-size: 30px;
+            font-weight: bold; 
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            padding: 5px;
+        }
+
+        #weather{
+            display: flex;
+            flex-direction: row-reverse;
+                }
+        #weather-info{
+        font-size: 20px;
+        display: flex;
+        flex-direction: row-reverse;
+        }
+        img {
+           margin-right: 20px;
+           margin-top: -10px;
+
+        }
+    </style>
+</head>
+
+<body>
+    <section id = "weather">
+        <div id="weather-info">
+        </div>
+    </section>
+    <header>
+        <h1>CPSC431-01 Homework 3 App</h1>
+        <p>
+            Description Here
+        </p>
+       
+    </header>
+    <main>
+        <!-- Here are 2 starter sections. Add more based on the functional requirements-->
+        <div class = "rowDisplay">
+        <section id = "findStudent">
+            <h2>Find a Student</h2>
+            <form id="GetStudent">
+                <input type="text" name="cwid" value="CWID" maxlength="5">
+                <button type="button" data-action="getStudent">Go!</button>
+            </form>
+        </section>
+        <section id = "addStudent">
+            <h2>Add a Student</h2>
+            <form id="CreateAStudent">
+             <input type="text" name="name" value="Full Name">
+             <button type="button" data-action="postStudent" data-form="CreateAStudent">Go!</button>
+            </form>
+         </section>
+         <section id = "allStudent">
+            <h2>Find All Students</h2>
+            <button type="button" data-action="getAllStudents" id = "allStudentButton">Go!</button>
+        </section>
+    </div>
+    <div class = "rowDisplay">
+        <section id = "updateStudent">
+            <h2>Update Student</h2>
+            <form id="UpdateStudent">
+                <input type="text" name="cwid" value="CWID" maxlength="5">
+                <input type="text" name="name" value="Full Name">
+                <button type="button" data-action="putStudent" data-form="UpdateStudent">Go!</button>
+            </form>
+        </section>
+        <section id = "deleteStudent">
+            <h2>Delete</h2>
+            <form id="DeleteStudent">
+                <input type="number" name="cwid">
+                <button type="button" data-action="deleteStudent" data-form="DeleteStudent">Go!</button>
+            </form>
+        </section>
+    </div>
+    <div class = "rowDisplay">
+        <section id = "addStudentGrade">
+            <h2>Add Grade</h2>
+            <form id="AddGrade">
+                <input type="text" name="cwid" value="CWID" maxlength="5">
+                <input type="text" name="hwid" value="Homework ID">
+                <input type="number" name="grade" value="" placeholder="Score" min=0 max=100>
+                <button type="button" data-action="postGrade" data-form="UpdateGrade">Go!</button>
+            </form>
+        </section>
+        <section id = "resetStudents">
+            <h2>Reset Form</h2>
+            <button type="button" data-action="resetData" id = "resetStudentsButton">Reset</button>
+        </section>
+    </div>
+        <!-- 
+            You can use the area below to show the results of your tests. 
+        -->
+        <section>
+            <h2>Test Results...</h2>
+            <div id="TestResults">
+            </div>
+        </section>
+    </main>
+    <script>
+
+        //PUT adds another entry to the json rather than  updating it
+        //DELETE does not delete
+        //How to calc GPA with only one class 
+        //encode && datastring 
+        'use strict';
+        function extractStudentInfo(students) {
+            let studentInfo = "";
+            for (let key in students) {         
+            const student = students[key];       
+            studentInfo += "Name: " + student.name + " CWID: " + student.cwid + "<br>";
+            }
+            return studentInfo;
+            }
+
+        function displayGrades(data) {
+            let gradesString = ""
+            if (data && data.grades) {
+                const grades = data.grades;
+                for (let key in grades) {
+                    if (grades[key] == "") {
+                        gradesString += key + ": " + " Has not been graded" + "<br>"  
+                    }
+                    else{
+                        gradesString += key + ": " + grades[key] + "<br>"
+                    }
+                }
+                return gradesString;
+
+            } else {
+               return "No grades found."
+            }
+        }
+
+        function avgHWGrade(data) {
+            let GPA = 0
+            if (data && data.grades) {
+                const grades = data.grades;
+         
+                for (let key in grades) {
+                    GPA += Number(grades[key] )
+                }
+                return GPA / Object.keys(data.grades).length;
+
+            } else {
+               return "N/A"
+            }
+        }
+
+        function calculateGrade(data) {
+            let grade;
+            switch (true) {
+                case (data >= 89.5):
+                    grade = 'A';
+                    break;
+                case (data >= 79.5):
+                    grade = 'B';
+                    break;
+                case (data >= 69.5):
+                    grade = 'C';
+                    break;
+                case (data >= 59.5):
+                    grade = 'D';
+                    break;
+                default:
+                    grade = 'F';
+            }
+            return grade;
+        }
+
+
+        function _encode(data) {
+            if (!data) return "";
+            return Object.keys(data).map(k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k])).join('&');
+        }
+
+        function _dataString(data) {
+            let jsonData = JSON.stringify(data); 
+            
+            return _encode({
+                json: jsonData
+            });
+        }
+       
+        function showResult(data) {
+            if (typeof data != 'string') {
+                data = JSON.stringify(data);
+            }
+            document.querySelector("#TestResults").innerHTML = data;
+
+        }
+
+        function readFormData(formId) {
+            const form = document.querySelector(`#${formId}`);
+
+            const formData = new FormData(form);
+
+            const entries = Object.fromEntries(formData.entries());
+
+            return entries; 
+        }
+
+        async function fetchWeatherData() {
+            try {
+                let response = await fetch('api/HW3_CortesAllan.php');
+                let data = await response.json(); 
+                let city = data.city
+                let temperature = data.temperature;
+                let condition = data.condition;
+                let imageUrl = data.imageUrl;
+                
+                document.querySelector("#weather-info").innerHTML = city + ` Weather <br>Temperature: ${temperature} °F, Condition: ${condition}`;
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = 'Weather Icon';
+                document.getElementById('weather-info').appendChild(img)
+               
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+            }
+        }
+
+        async function jsonRequest(url, method, data) {
+
+            let options = {};
+            options.method = method;
+            options.headers = { "content-Type": "application/x-www-form-urlencoded" };
+
+           
+            if(method !== "GET")
+            {   
+                options.body = _dataString(data);
+            }
+
+            let request = await fetch(url, options); 
+
+            return await request.json();
+
+        }
+
+        const actions = {};
+
+        actions.resetData = async () => {
+
+            let info = await jsonRequest("api/reset", "GET");
+            showResult("Data has been reset.");
+        };
+
+        actions.getStudent = async () => {
+            let formData = readFormData("GetStudent");
+            let CWID = formData.cwid;  
+            let requestUrl = `api/student?id=${CWID}`;
+            let students = await jsonRequest(requestUrl, "GET");
+            showResult("Name: " + students.name + "<br>CWID: " + students.cwid +"<br>" +"Overall Grade: "+ avgHWGrade(students).toFixed(2) +"%  " + calculateGrade(avgHWGrade(students)) +"<br>" + displayGrades(students));
+
+        };
+
+        actions.getAllStudents = async () => {
+            let students = await jsonRequest(`api/student`, "GET");
+            showResult(extractStudentInfo(students.items));
+        }
+        
+        actions.postStudent = async () => {
+            let info = readFormData("CreateAStudent");
+            let newStudent = await jsonRequest(`api/student`, "POST", info);
+            showResult("Success! "+ newStudent.name + " CWID: " + newStudent.cwid + " has been added!");
+
+        }
+
+        actions.putStudent = async () => {
+            let info = readFormData("UpdateStudent");
+            let oldStudent = await jsonRequest(`api/student?id=${info.cwid}`, "GET");
+            let updatedStudent = await jsonRequest(`api/student`, "PUT", info);
+            showResult("Success! " + oldStudent.name + " has been updated to " + updatedStudent.name + " CWID: " + updatedStudent.cwid)
+        }
+
+
+        actions.deleteStudent = async () => {
+            let info = readFormData("DeleteStudent")
+            let deletedStudent = await jsonRequest(`api/student?id=${info.cwid}`, "DELETE", info);
+            showResult("Deleted Student, CWID: " + info.cwid)
+        }
+
+        actions.postGrade = async () => {
+            let info = readFormData("AddGrade");
+            let result = await jsonRequest(`api/grade`, "PUT", info);
+            showResult("Updated " + info.hwid + " with grade " + info.grade + " for CWID: " + info.cwid);
+      }
+    
+      fetchWeatherData() 
+
+        document.body.addEventListener("click", (e) => {
+            let action = e.target.dataset?.action ?? null;
+
+            if (actions[action]) {
+
+                let sourceElement = e.target;
+
+                actions[action]?.(sourceElement);
+            }
+
+        });
+
+    </script>
+</body>
+
+</html>
