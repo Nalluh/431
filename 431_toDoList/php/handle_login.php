@@ -10,8 +10,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['userPassword'];
 }
 
+//prevent sql injection 
+$sanitized_email =  mysqli_real_escape_string($con, $email);
+
 //look for email in db 
-$query = "select * from Users where email = '$email' limit 1";
+$query = "select * from Users where email = '$sanitized_email' limit 1";
 $result = mysqli_query($con, $query);
 //if email found in db 
 if (mysqli_num_rows($result) > 0)
@@ -26,7 +29,7 @@ if (verifyPassword($password,$user_data['password'])){
     //redirect to home with success login
     header("Location: /431_toDoList/home.html");
     exit(); 
-    ;
+    
  }
 }
 //else wrong info and return to login with error 
