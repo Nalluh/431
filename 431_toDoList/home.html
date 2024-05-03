@@ -19,11 +19,11 @@ font-size: 35px;
 
 #logout{
     padding-right: 15px;
-    font-size: 20px;
     text-decoration:none;
+    font-size: 30px;
     color: white;
-
-
+    position: absolute;
+    right: 100px;
 }
 #userWelcome{
 padding: 5px;
@@ -47,11 +47,12 @@ form {
 input[type="text"] {
     width: 100%;
     margin-bottom: 10px;
+    margin-right: 20px;
     padding: 8px;
     box-sizing: content-box;
     border-radius: 10px;
 }
-.add-item-btn{
+.add-item-btn,.add-or-update-item-btn {
     color:rgb(0, 0, 0);
     padding: 5px;
     background-color: Transparent;
@@ -74,9 +75,9 @@ font-size: 15px;
     padding: 10px;
     margin-bottom: 5px;
     border: 1px solid #ccc;
-    background-color: #ccc;
+    background-color: #ffffff;
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
     font-size: 32px;
 
 }
@@ -95,34 +96,62 @@ font-size: 15px;
 .btnDiv{
     padding:5px;
 }
+
+.inputRowDiv{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    width: 470px;
+}
+
+#removeBtn{
+    margin: 3px 0px 0px 10px;
+    border: none;
+    background: none;
+    }
+
+    #removeBtn:hover{
+        color: red;
+    }
+
+#updateBtn,#deleteListBtn
+{
+    padding: 5px;
+    margin: 5px;
+}
+
+#myDeleteModalTextContext{
+    font-size: 20px;
+}
 </style>
 <body>
     
     <nav class="navbar navbar-dark bg-primary">
         <span id="appname" class="navbar-brand mb-0 h1">TaskHub</span>
-        <a id="logout" class="navbar-brand mb-0" href="php/handle_logout.php">Logout</a>
+        <a id="logout" class="navbar-brand mb-0 h1" href="php/handle_logout.php">Logout</a>
     </nav>
-    <div id="userWelcome">
+
+      <!--  Display User's name -->
+     <div id="userWelcome">
     </div>
+          <!--  Where we will be showing the To Do Lists -->
     <div id ="taskContainer">
         
     </div>
    
-      <!-- Trigger the modal with a button -->
-  <button type="button" class="btn btn-primary btn-md" data-toggle="modal" data-target="#myModal">+ Add Task</button>
-
-  <!-- Modal -->
+  <!--  This Modal will Handle Adding in Tasks -->
+  <div style="padding-left: 15px;">
+<button type="button" class="btn btn-primary btn-md" data-toggle="modal" data-target="#myModal" >+ Add Task</button>
+</div>
   <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
-    
-      <!-- Modal content-->
-      <div class="modal-content">
+          <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
           <h4 class="modal-title">Create New To Do List</h4>
         </div>
         <div class="modal-body">
-                <form id="addItemForm" action="php/post_new_TDL.php" method="post">
+            <form id="addItemForm" action="php/post_new_TDL.php" method="post">
                 <label for="title">To Do List Title:</label>
                 <input type="text" id="title" name="title" placeholder="ex: Mondays goals" required> 
                 <label>To Do List Items:</label>
@@ -146,10 +175,75 @@ font-size: 15px;
   </div>
 
 
+  <!--  This Modal will Handle Updating Tasks -->
+
+  <div class="modal fade" id="myUpdateModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Create New To Do List</h4>
+        </div>
+        <div class="modal-body">
+                <form id="updateItemForm" action="php/put_TDL.php" method="POST">
+                <label for="updateTitle">To Do List Title:</label>
+                <input type="text" id="updateTitle" name="updateTitle" placeholder="ex: Mondays goals" required> 
+                <input type="hidden" id="listNameReference" name="listNameReference"/>
+                <label>To Do List Items:</label>
+                <div class ="updatedUserItems">
+                </div> 
+            </form>
+            <div class = "add-item">
+            <button class="add-or-update-item-btn"><p id ="add-btn-font"> Add Item &plus;</p></button>
+             </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <!----The button below is what i want to use to submit form -->
+            <button type="button" class="btn btn-primary modal-submit-update" data-dismiss="modal" >Submit</button>
+
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!--  This Modal will confirm deletion of list with the user -->
+
+  <div class="modal" tabindex="-1" id = "myDeleteModal" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id ="myDeleteModalHeader">Delete To Do List?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <p id = "myDeleteModalTextContext"></p>
+            <form id="deleteListForm" action="php/put_TDL.php" method="POST">
+          <input type="hidden" id="deleteListTitle" name="deleteListTitle"/>
+        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary modal-submit-delete">Delete List</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 
 <script>
 "use strict";
+
+//TDL - To Do List
+//Tasks = TDL items
+
+
 
 
 //fetch user info 
@@ -165,70 +259,206 @@ async function getUserInfo() {
             }
 }
 
+
+let openDropdown = null;
+let userOpenedLastTaskRow = null;
+let checkBoxCounter = 0;
+
 //maps list title name to their corresponding tasks
 // also preserves  the order of lists in TDL when button is clicked 
-function showTDLTasks(targetTitle,namesArray, valuesArray) {
-    // Check if a list is already displayed
-    const existingList = this.nextSibling;
-    if (existingList && existingList.tagName === "UL") {
-        // If a list is already displayed, remove it
-        existingList.parentNode.removeChild(existingList);
-    } else {
-        // Create a list of numbers
-        const tasksList = document.createElement("ul");
-        tasksList.className = "tdlTitle";
-        for (let i = 0; i < namesArray.length; i++) {
-            // if values == "" that indicates its a list without anything pending 
-            // do not display a list with blank values
-            if (namesArray[i] === targetTitle && valuesArray[i] !== "") {
-                const listItem = document.createElement("li");
-                listItem.className = "tdlItems"
-                // Add the task text
-                const taskText = document.createTextNode(valuesArray[i]);
-                listItem.appendChild(taskText);
-                // Append the list item to the tasks list
-                tasksList.appendChild(listItem);
-            }
-        
+function showTDLTasks(targetTitle, namesArray, valuesArray, isCheckedArray) {
 
-        }
-        //create a div so we can give some space between the button and the list
-        const tasksUpdateDiv = document.createElement("div");
-        tasksUpdateDiv.className = "btnDiv";
-        tasksList.appendChild(tasksUpdateDiv);
-
-        // create a button to modify list
-        const tasksUpdate = document.createElement("button");
-        tasksUpdate.innerHTML="Update Tasks";
-        tasksUpdate.className ="btn btn-primary";
-        
-        tasksList.appendChild(tasksUpdate);
-        // Insert the list of numbers after the clicked button
-        this.parentNode.insertBefore(tasksList, this.nextSibling);
+        //self close 
+        // on last row there is an issue with opening/closing
+        //we delete last sibling 
+        //but last row is last sibling so null happens on click
+        //we check if its not last item so we can maintain normal functionality
+        //if last just do an extra check
+    if (openDropdown === this.nextSibling && targetTitle != namesArray[namesArray.length-1] ) {
+        //close it
+        userOpenedLastTaskRow = null;
+        openDropdown.parentNode.removeChild(openDropdown);
+        openDropdown = null;
+          // user opened a new task reset counter
+          checkBoxCounter = 0;
+       return;
     }
+
+    // Check if there's an open task menu
+    if (openDropdown) {
+        if(targetTitle == namesArray[namesArray.length-1] ){
+            openDropdown.parentNode.removeChild(openDropdown);
+        openDropdown = null;
+          // user opened a new task reset counter
+          checkBoxCounter = 0;
+       return;
+        }
+        // user opened a new task reset counter
+        checkBoxCounter = 0;
+        openDropdown.parentNode.removeChild(openDropdown);
+        openDropdown = null;
+    }
+    
+ 
+
+
+  
+
+    // Create a new dropdown
+    const tasksList = document.createElement("ul");
+    tasksList.className = "tdlTitle";
+    var taskText;
+    let hasTasks = null;
+
+    // Add tasks to the new dropdown
+   //add list items
+    for (let i = 0; i < namesArray.length; i++) {
+        if (namesArray[i] === targetTitle && valuesArray[i] !== "") {
+            const listItem = document.createElement("li");
+            hasTasks = true;
+            listItem.className = "tdlItems";
+
+            //check if completed and add x / check and red/green
+            isCheckedArray[i] === "0" ? taskText = document.createTextNode(valuesArray[i] + "       \u2715") :  taskText = document.createTextNode(valuesArray[i] + "      \u2713");
+            isCheckedArray[i] === "0" ? listItem.style.color = "red" : listItem.style.color = "green";
+
+            listItem.appendChild(taskText);
+            tasksList.appendChild(listItem);
+            
+        }//if no list items 
+        else if(hasTasks == null && i == namesArray.length-1){
+        const listItem = document.createElement("li");
+        taskText = document.createTextNode("No tasks currently available.");
+        listItem.style.fontSize = "24px";
+        listItem.appendChild(taskText);
+            tasksList.appendChild(listItem);
+        }
+    }
+     //create a div so we can give some space between the button and the list
+    const tasksUpdateDiv = document.createElement("div");
+    tasksUpdateDiv.className = "btnDiv";
+    tasksList.appendChild(tasksUpdateDiv);
+
+    // Create a button for updating tasks
+    // additional attributes toggle modal functionality
+    const tasksUpdate = document.createElement("button");
+    tasksUpdate.innerHTML = "Update Tasks";
+    tasksUpdate.className = "btn btn-primary";
+    tasksUpdate.setAttribute("id", "updateBtn");
+    tasksUpdate.setAttribute("data-toggle", "modal");
+    tasksUpdate.setAttribute("data-target", "#myUpdateModal");
+
+    //create a button for deleting list
+     // additional attributes toggle modal functionality
+    const listDelete = document.createElement("button");
+    listDelete.innerHTML = "Delete List";
+    listDelete.className = "btn btn-danger";
+    listDelete.setAttribute("id", "deleteListBtn");
+    listDelete.setAttribute("data-toggle", "modal");
+    listDelete.setAttribute("data-target", "#myDeleteModal");
+
+    // add to ul to create list of items
+    tasksList.appendChild(tasksUpdate);
+    tasksList.appendChild(listDelete); 
+
+    //keep track of current open tab 
+    if (this.nextSibling) {
+        this.parentNode.insertBefore(tasksList, this.nextSibling);
+    } else {
+        this.parentNode.appendChild(tasksList);
+    }
+
+    // Set the new dropdown as the open dropdown
+    openDropdown = tasksList;
+    
+   
 }
+
+
+
+
 
 // pass in user_info object to grab to do list name and text
 //make the list name array into a set 
 //send names and text arrays to another function to map TDL names to their corresponding tasks
- function showTDL(user_info){
+function showTDL(user_info) {
     const container = document.getElementById("taskContainer");
-        let list_names = user_info.list_name;
-        let list_text = user_info.list_text;
-        let list_names_set = new Set(user_info.list_name);
+    let list_names = user_info.list_name;
+    let list_text = user_info.list_text;
+    let list_checkBox = user_info.list_checkbox;
+    let list_names_set = new Set(user_info.list_name);
 
-        list_names_set.forEach(function(listTitle) {
-           let row = document.createElement("button");
-           row.className ="taskRow";
-           row.innerHTML = listTitle;
-            
-           row.addEventListener("click", function() {
-     showTDLTasks.call(this,listTitle, list_names, list_text);
-        });
-           container.appendChild(row);
+    //map list names to their corresponding task
+    //create rows of TDL
+    list_names_set.forEach(function(listTitle) {
+        let row = document.createElement("button");
+        row.className = "taskRow";
+        row.innerHTML = listTitle;
+        row.addEventListener("click", function() {
+            //show TDL items
+            showTDLTasks.call(this, listTitle, list_names, list_text, list_checkBox);
 
+            //get the current  task list title when clicking on it
+            document.getElementById("updateTitle").value = listTitle;
+            //select form for update modal
+            let container = document.querySelector('.updatedUserItems');
+            //check if there has been a child appended
+            // if so remove the child
+            // prevents form being shown with info from previous click
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+
+            checkBoxCounter = 0;
+            // find corresponding  item in items array and add to form
+            for (let i = 0; i < list_text.length; i++) {
+            if (list_names[i] === listTitle && list_text[i] !== "") {
+                //create elements
+                let input = document.createElement('input');
+                let checkBoxInput = document.createElement('input');
+                let removeButton = document.createElement('button');
+
+
+                //set element properties  
+                checkBoxInput.type = 'checkbox';
+                checkBoxInput.name = 'isTaskCompleted'+checkBoxCounter;
+                input.type = 'text';
+                input.name = 'updatedItems[]';
+                input.className = "updateInput";
+                input.value = list_text[i];
+                input.readOnly = true;
+                removeButton.type = "button";
+                removeButton.value = input.value;
+                removeButton.setAttribute("id","removeBtn");
+                removeButton.textContent = "\u2715";
+
+                //check value and assign check or not 
+                list_checkBox[i] === "0" ? checkBoxInput.checked = false : checkBoxInput.checked = true;
+
+                //create div so we can have flex-row
+                const inputRow = document.createElement("div");
+                inputRow.className = "inputRowDiv";
+
+                //set up the row
+                container.appendChild(inputRow);
+                inputRow.appendChild(input);
+                inputRow.appendChild(checkBoxInput);
+                inputRow.appendChild(removeButton);
+
+                checkBoxCounter++;
+              
+              
+            }
+        }
+           
         });
- }
+
+        container.appendChild(row);
+    });
+
+   
+}
+
 
 
 //Checks if user has been authenticated , if not redirects them to login page
@@ -250,7 +480,7 @@ let user_info;
       }
 })();
 
-//Dynamically adds input fields to modal  when add task button is clicked
+//Dynamically adds input fields to  (add task) modal  when add task button is clicked
 document.querySelector('.add-item-btn').addEventListener('click', function() {
 
         let container = document.querySelector('.userItems');
@@ -272,18 +502,86 @@ document.querySelector('.add-item-btn').addEventListener('click', function() {
         submitForm(); 
     });
 
-    async function getUserTDL() {
-    try{
-        let response = await fetch('php/get_TDL.php');
-        let data = await response.json(); 
-        console.log(data)
-        return data;
+//Dynamically adds input fields to  (update TDL) modal  when update task button is clicked
+document.querySelector('.add-or-update-item-btn').addEventListener('click', function() {
+let container = document.querySelector('.updatedUserItems');
+const inputRow = document.createElement("div");
+inputRow.className = "inputRowDiv";
+let input = document.createElement('input');
+let checkBoxInput = document.createElement('input');
+input.type = 'text';
+checkBoxInput.type = 'checkbox';
+checkBoxInput.name = 'isTaskCompleted'+checkBoxCounter;
+input.name = 'updatedItems[]';
+input.placeholder = 'Add an item to this list';
+container.appendChild(inputRow);
+inputRow.appendChild(input);
+inputRow.appendChild(checkBoxInput);
+checkBoxCounter++;
+});
+
+
+  // grab form
+  function submitUpdatedForm() {
+        //reset cbcounter so that  each checkbox has a unique name attribute for the backend
+        checkBoxCounter =0;
+        document.getElementById('updateItemForm').submit(); 
     }
-    catch (error) {
-     console.error('Error fetching data:', error);
+
+    //Post request to server with new task added
+    document.querySelector('.modal-submit-update').addEventListener('click', function() {
+        submitUpdatedForm(); 
+    });
+  
+      // grab form
+  function submitDeleteList() {
+    document.getElementById('deleteListForm').submit(); 
+  }
+  document.querySelector('.modal-submit-delete').addEventListener('click', function() {
+        submitDeleteList(); 
+    });
+
+
+      // handle removing values from list
+        document.addEventListener("click", function(event) {
+         let source = event.target;
+            if (source.matches('#removeBtn')) {
+                // Check if the item is already marked for removal
+                const container = document.querySelector('.updatedUserItems');
+                const existingInput = container.querySelector(`input[value="${source.value}"]`);
+                console.log(existingInput)
+                if (existingInput) {
+                    // If the item is already marked for removal, remove the input field
+                    source.style.color = "grey";
+                    container.removeChild(existingInput);
+                } else {
+                    // If the item is not marked for removal, mark it for removal
+                    console.log(source.value);
+                    source.style.color = "red";
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.name = "removeItems[]";
+                    hiddenInput.value = source.value;
+                    hiddenInput.type = "hidden";
+                    container.appendChild(hiddenInput);
+                }
             }
-}
+            // used to grab name of list when update modal is opened
+            //used in backend to check if title of list needs to be updated
+            if(source.matches("#updateBtn")){
+                let title = document.getElementById("updateTitle").value;
+                document.getElementById("listNameReference").value = title;
+            }
+              // used to grab name of list when update modal is opened
+             // update context of modal when user wants to delete
+            if(source.matches('#deleteListBtn')){
+                let title = document.getElementById("updateTitle").value;
+                let textContent = "Are you sure you want to delete the To Do List: " + title + "?<br> This action is <strong><u>permenant</u></strong>";
+                // Set the text content with inline styling to the element
+                document.getElementById("myDeleteModalTextContext").innerHTML = textContent;
+                document.getElementById("deleteListTitle").value = title;
+            }
 
-
+                            });
+            
 </script>
 </html>

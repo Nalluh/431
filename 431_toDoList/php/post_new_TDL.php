@@ -30,7 +30,8 @@ $list_idx = $list_idx['list_idx'];
 
 //submits  text (items) and list_idx into DB
 foreach ($toDoListItems as $index => $value) {
-    $query =  "INSERT INTO User_Lists_items (list_idx, text) values ('$list_idx', '$value')";
+
+        $query =  "INSERT INTO User_Lists_items (list_idx, text) values ('$list_idx', '$value')";
     mysqli_query($con, $query);
  }
 
