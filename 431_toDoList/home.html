@@ -26,7 +26,6 @@ font-size: 35px;
     right: 100px;
 }
 #userWelcome{
-padding: 5px;
 font-size: 32px;
 font-weight: bold;
 }
@@ -123,6 +122,16 @@ font-size: 15px;
 #myDeleteModalTextContext{
     font-size: 20px;
 }
+
+.heading{
+    padding-bottom: 5px;
+    margin-left: 15px;
+}
+select{
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 2px;
+}
 </style>
 <body>
     
@@ -130,10 +139,18 @@ font-size: 15px;
         <span id="appname" class="navbar-brand mb-0 h1">TaskHub</span>
         <a id="logout" class="navbar-brand mb-0 h1" href="php/handle_logout.php">Logout</a>
     </nav>
-
+    <div class ="heading">
       <!--  Display User's name -->
      <div id="userWelcome">
     </div>
+    <label for="dropdown">Sort by:</label>
+<select id="dropdown" name="dropdown">
+  <option value="sortCreated">Created</option>
+  <option value="sortName">Name</option>
+  <option value="sortAsc">Ascending</option>
+  <option value="sortDesc">Descending</option>
+</select>
+</div>
           <!--  Where we will be showing the To Do Lists -->
     <div id ="taskContainer">
         
@@ -246,12 +263,14 @@ font-size: 15px;
 
 
 
+
 //fetch user info 
 async function getUserInfo() {
     try{
-        let response = await fetch('php/get_TDL.php');
+        let selectedValue = document.getElementById('dropdown').value;
+        let response = await fetch(`php/get_TDL.php?selectedValue=${selectedValue}`);        
         let data = await response.json(); 
-        console.log(data)
+        console.log(data);
         return data;
     }
     catch (error) {
@@ -307,7 +326,8 @@ function showTDLTasks(targetTitle, namesArray, valuesArray, isCheckedArray) {
     // Create a new dropdown
     const tasksList = document.createElement("ul");
     tasksList.className = "tdlTitle";
-    var taskText;
+    //
+    let taskText;
     let hasTasks = null;
 
     // Add tasks to the new dropdown
@@ -383,11 +403,16 @@ function showTDLTasks(targetTitle, namesArray, valuesArray, isCheckedArray) {
 //send names and text arrays to another function to map TDL names to their corresponding tasks
 function showTDL(user_info) {
     const container = document.getElementById("taskContainer");
+    // remove information from container
+    // when list is sorted we can delete the previous rows
+    // without this when the user sorts the list it would append the sorted list 
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+}
     let list_names = user_info.list_name;
     let list_text = user_info.list_text;
     let list_checkBox = user_info.list_checkbox;
     let list_names_set = new Set(user_info.list_name);
-
     //map list names to their corresponding task
     //create rows of TDL
     list_names_set.forEach(function(listTitle) {
@@ -465,6 +490,7 @@ function showTDL(user_info) {
 // if authenticated grab users information
 // display name
 // calls showTDL to seperate unique task names into buttons
+
 let user_info;
 (async () => {
      user_info = await getUserInfo();
@@ -576,12 +602,27 @@ checkBoxCounter++;
             if(source.matches('#deleteListBtn')){
                 let title = document.getElementById("updateTitle").value;
                 let textContent = "Are you sure you want to delete the To Do List: " + title + "?<br> This action is <strong><u>permenant</u></strong>";
-                // Set the text content with inline styling to the element
                 document.getElementById("myDeleteModalTextContext").innerHTML = textContent;
                 document.getElementById("deleteListTitle").value = title;
             }
 
                             });
+
+//checks for update in the dropdown for sorting
+// GET(s) information again based on parameter on the select 
+   document.getElementById('dropdown').addEventListener('change', async () => {
+    let selectedValue = document.getElementById('dropdown').value;
+
+    let user_info;
+    try {
+        user_info = await getUserInfo();
+            showTDL(user_info, selectedValue); // Pass selected value to showTDL function
+        
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+    }
+});
+
             
 </script>
 </html>
