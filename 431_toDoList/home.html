@@ -64,7 +64,7 @@ input[type="text"] {
     margin-left: 80px;
 }
 
-#add-btn-font{
+.add-btn-font{
 font-size: 15px;
 }
 
@@ -132,6 +132,11 @@ select{
     border-radius: 10px;
     padding: 2px;
 }
+
+#selectOptions{
+    margin-top: 15px;
+}
+
 </style>
 <body>
     
@@ -143,13 +148,17 @@ select{
       <!--  Display User's name -->
      <div id="userWelcome">
     </div>
+    <div id="selectOptions">
     <label for="dropdown">Sort by:</label>
 <select id="dropdown" name="dropdown">
   <option value="sortCreated">Created</option>
   <option value="sortName">Name</option>
-  <option value="sortAsc">Ascending</option>
-  <option value="sortDesc">Descending</option>
 </select>
+<select id="dropdownOrder" name="dropdownOrder">
+    <option value="sortAsc">Ascending</option>
+    <option value="sortDesc">Descending</option>
+  </select>
+</div>
 </div>
           <!--  Where we will be showing the To Do Lists -->
     <div id ="taskContainer">
@@ -177,12 +186,12 @@ select{
                 </div> 
             </form>
             <div class = "add-item">
-            <button class="add-item-btn"><p id ="add-btn-font"> Add Item &plus;</p></button>
+            <button class="add-item-btn add-btn-font"> Add Item &plus;</button>
              </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <!----The button below is what i want to use to submit form -->
+            <!--The button below is what i want to use to submit form -->
             <button type="button" class="btn btn-primary modal-submit" data-dismiss="modal" >Submit</button>
 
         </div>
@@ -207,18 +216,18 @@ select{
                 <form id="updateItemForm" action="php/put_TDL.php" method="POST">
                 <label for="updateTitle">To Do List Title:</label>
                 <input type="text" id="updateTitle" name="updateTitle" placeholder="ex: Mondays goals" required> 
-                <input type="hidden" id="listNameReference" name="listNameReference"/>
+                <input type="hidden" id="listNameReference" name="listNameReference">
                 <label>To Do List Items:</label>
                 <div class ="updatedUserItems">
                 </div> 
             </form>
             <div class = "add-item">
-            <button class="add-or-update-item-btn"><p id ="add-btn-font"> Add Item &plus;</p></button>
+            <button class="add-or-update-item-btn add-btn-font"> Add Item &plus;</button>
              </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <!----The button below is what i want to use to submit form -->
+            <!--The button below is what i want to use to submit form -->
             <button type="button" class="btn btn-primary modal-submit-update" data-dismiss="modal" >Submit</button>
 
         </div>
@@ -241,7 +250,7 @@ select{
         <div class="modal-body">
             <p id = "myDeleteModalTextContext"></p>
             <form id="deleteListForm" action="php/put_TDL.php" method="POST">
-          <input type="hidden" id="deleteListTitle" name="deleteListTitle"/>
+          <input type="hidden" id="deleteListTitle" name="deleteListTitle">
         </form>
         </div>
         <div class="modal-footer">
@@ -259,9 +268,6 @@ select{
 
 //TDL - To Do List
 //Tasks = TDL items
-
-
-
 
 
 //fetch user info 
@@ -293,7 +299,7 @@ function showTDLTasks(targetTitle, namesArray, valuesArray, isCheckedArray) {
         //but last row is last sibling so null happens on click
         //we check if its not last item so we can maintain normal functionality
         //if last just do an extra check
-    if (openDropdown === this.nextSibling && targetTitle != namesArray[namesArray.length-1] ) {
+    if (openDropdown === this.nextSibling && targetTitle != namesArray[namesArray.length-1]) {
         //close it
         userOpenedLastTaskRow = null;
         openDropdown.parentNode.removeChild(openDropdown);
@@ -326,7 +332,7 @@ function showTDLTasks(targetTitle, namesArray, valuesArray, isCheckedArray) {
     // Create a new dropdown
     const tasksList = document.createElement("ul");
     tasksList.className = "tdlTitle";
-    //
+    
     let taskText;
     let hasTasks = null;
 
@@ -351,9 +357,27 @@ function showTDLTasks(targetTitle, namesArray, valuesArray, isCheckedArray) {
         taskText = document.createTextNode("No tasks currently available.");
         listItem.style.fontSize = "24px";
         listItem.appendChild(taskText);
+        
             tasksList.appendChild(listItem);
         }
     }
+
+    // when the user sorts by desc the TDL tasks are also reversed, IE red on top green on bottom
+    // with this we check if the user has selected a desc sort value
+    // then we grab the list elements 
+    // clear the list
+    // reverse the list and append
+    //  end result is a list with green on top, red on bottom 
+    if(document.getElementById('dropdownOrder').value == "sortDesc"){
+        const items = tasksList.querySelectorAll('li');
+        const reversedItems = Array.from(items).reverse();
+        tasksList.innerHTML = ''; 
+        reversedItems.forEach(item => {
+            tasksList.appendChild(item);
+        });       
+    }
+
+
      //create a div so we can give some space between the button and the list
     const tasksUpdateDiv = document.createElement("div");
     tasksUpdateDiv.className = "btnDiv";
@@ -377,7 +401,7 @@ function showTDLTasks(targetTitle, namesArray, valuesArray, isCheckedArray) {
     listDelete.setAttribute("data-toggle", "modal");
     listDelete.setAttribute("data-target", "#myDeleteModal");
 
-    // add to ul to create list of items
+    // add buttons
     tasksList.appendChild(tasksUpdate);
     tasksList.appendChild(listDelete); 
 
@@ -611,18 +635,52 @@ checkBoxCounter++;
 //checks for update in the dropdown for sorting
 // GET(s) information again based on parameter on the select 
    document.getElementById('dropdown').addEventListener('change', async () => {
+    //if user sorts the list while an active list is open it will cause null on refresh
+    // this closes the dropdown before we get the new sorted information 
+    if (openDropdown) {
+    openDropdown.parentNode.removeChild(openDropdown);
+    openDropdown = null;
+    }
     let selectedValue = document.getElementById('dropdown').value;
-
+    let selectedOrder = document.getElementById('dropdownOrder');
+    // when ever user selects an option to sort by ( created or name ) we reset the second select back to the first index (asc)
+    selectedOrder.selectedIndex = 0;
     let user_info;
     try {
         user_info = await getUserInfo();
-            showTDL(user_info, selectedValue); // Pass selected value to showTDL function
+        showTDL(user_info); 
         
     } catch (error) {
         console.error('Error fetching user info:', error);
     }
 });
 
+
+//checks for update in the dropdown for sorting
+// GET(s) information again based on parameter on the select 
+document.getElementById('dropdownOrder').addEventListener('change', async () => {
+    //if user sorts the list while an active list is open it will cause null on refresh
+    // this closes the dropdown before we get the new sorted information 
+    if (openDropdown) {
+    openDropdown.parentNode.removeChild(openDropdown);
+    openDropdown = null;
+    }
+    let selectedOrder = document.getElementById('dropdownOrder').value;
+    let user_info;
+    try {
+        user_info = await getUserInfo();
+        if(selectedOrder == "sortDesc"){
+            user_info.list_checkbox = user_info.list_checkbox.reverse();
+            user_info.list_name = user_info.list_name.reverse();
+            user_info.list_text = user_info.list_text.reverse();
+
+        }
+            showTDL(user_info); 
+        
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+    }
+});
             
 </script>
 </html>
